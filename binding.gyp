@@ -1,9 +1,10 @@
 {
   "targets": [
     {
-      "target_name": "node-sane",
+      "target_name": "node-saner",
       "sources": [
         "src/sane.cc",
+        "src/sane_constants.cc",
         "src/sane_device.cc",
         "src/sane_handle.cc",
         "src/sane_option_descriptor.cc",

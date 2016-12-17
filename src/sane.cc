@@ -9,6 +9,7 @@
 #include "sane_handle.h"
 #include "sane_option_descriptor.h"
 #include "sane_parameters.h"
+#include "sane_constants.h"
 
 using v8::Number;
 using v8::Local;
@@ -112,7 +113,7 @@ NAN_METHOD(GetDevicesSync) {
     }
 
     bool localOnly = Nan::To<Boolean>(info[0]).ToLocalChecked()->Value();
-    
+
     const SANE_Device** deviceList;
     SANE_Status status;
     status = sane_get_devices(&deviceList, localOnly);
@@ -204,7 +205,7 @@ NAN_METHOD(OpenSync) {
 
     String::Utf8Value nameArg (info[0].As<String>());
     std::string name (*nameArg);
-    
+
     SANE_Handle handle;
     SANE_Status status;
     status = sane_open(name.c_str(), &handle);
@@ -239,7 +240,7 @@ public:
         Local<Value> argv[] = {};
         callback->Call(0, argv);
     }
-    
+
 private:
     SANE_Handle handle;
 };
@@ -304,7 +305,7 @@ NAN_METHOD(GetOptionDescriptor) {
     Local<Object> handleObj = Nan::To<Object>(info[0]).ToLocalChecked();
     SaneHandle* handle = Nan::ObjectWrap::Unwrap<SaneHandle>(handleObj);
 	Local<Integer> n = info[1].As<Integer>();
-	
+
 	const SANE_Option_Descriptor* option = sane_get_option_descriptor(
 		handle->getHandle(), n->Value());
 	if (option == NULL) {
@@ -315,7 +316,7 @@ NAN_METHOD(GetOptionDescriptor) {
     Local<Function> descriptorFunc = descriptorTpl->GetFunction();
     Handle<Value> descriptorFuncArgs[] = { Nan::New<External>(const_cast<SANE_Option_Descriptor*>(option)) };
     Local<Value> descriptorObj = descriptorFunc->NewInstance(1, descriptorFuncArgs);
-    
+
     info.GetReturnValue().Set(descriptorObj);
 }
 
@@ -342,6 +343,11 @@ NAN_METHOD(ControlOption) {
         return Nan::ThrowTypeError("Fourth argument must be a buffer");
 	}
 
+  bool skipReorder = false;
+  if(info.Length() >= 4 && info[4]->IsBoolean()) {
+    if(info[4]->BooleanValue()) { skipReorder = true; }
+  }
+
     Local<Object> handleObj = Nan::To<Object>(info[0]).ToLocalChecked();
     SaneHandle* handle = Nan::ObjectWrap::Unwrap<SaneHandle>(handleObj);
 	Local<Integer> n = info[1].As<Integer>();
@@ -352,14 +358,16 @@ NAN_METHOD(ControlOption) {
 	SANE_Int i;
 	status = sane_control_option(handle->getHandle(), n->Value(), (SANE_Action) a->Value(), v, &i);
 
-	// Perform byte order conversion.
-	size_t v_words = node::Buffer::Length (info[3]->ToObject()) / sizeof (uint32_t);
-	for (size_t j = 0; j < v_words; j++) {
-		uint32_t* v_uint32 = (uint32_t*) v;
-		v_uint32[j] = htonl(v_uint32[j]);
-	}
+  if(!skipReorder) {
+    // Perform byte order conversion.
+  	size_t v_words = node::Buffer::Length (info[3]->ToObject()) / sizeof (uint32_t);
+  	for (size_t j = 0; j < v_words; j++) {
+  		uint32_t* v_uint32 = (uint32_t*) v;
+  		v_uint32[j] = htonl(v_uint32[j]);
+  	}
+  }
 
-    info.GetReturnValue().Set(Nan::New(status));
+  info.GetReturnValue().Set(Nan::New(status));
 }
 
 NAN_METHOD(OptionIsActive) {
@@ -502,7 +510,7 @@ NAN_METHOD(Read) {
     SaneHandle* handle = Nan::ObjectWrap::Unwrap<SaneHandle>(handleObj);
 	SANE_Byte* buf = (SANE_Byte*) node::Buffer::Data(info[1].As<Object>());
     Nan::Callback* callback = new Nan::Callback(info[2].As<Function>());
-    Nan::AsyncQueueWorker(new ReadWorker(callback, handle->getHandle(), buf, node::Buffer::Length(info[1].As<Object>())));    
+    Nan::AsyncQueueWorker(new ReadWorker(callback, handle->getHandle(), buf, node::Buffer::Length(info[1].As<Object>())));
 }
 
 NAN_METHOD(ReadSync) {
@@ -634,6 +642,7 @@ void InitAll(Handle<Object> exports) {
     SaneHandle::Init(exports);
     SaneDevice::Init(exports);
     SaneOptionDescriptor::Init(exports);
+    InitSaneConstants(exports);
 
     Nan::SetMethod(exports, "init", Init);
     Nan::SetMethod(exports, "exit", Exit);
@@ -658,4 +667,3 @@ void InitAll(Handle<Object> exports) {
 }
 
 NODE_MODULE(sane, InitAll)
-

@@ -24,8 +24,8 @@ private:
 	static NAN_GETTER(GetSize);
 	static NAN_GETTER(GetCap);
 	static NAN_GETTER(GetConstraintType);
-	//static NAN_GETTER(GetConstraint);
-	
+	static NAN_GETTER(GetConstraint);
+
 	const SANE_Option_Descriptor* _descriptor;
 };
 

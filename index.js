@@ -1,10 +1,83 @@
 'use strict';
-var binary = require('node-pre-gyp');
-var path = require('path');
-var bindingPath = binary.find(path.resolve(path.join(__dirname, './package.json')));
-var sane = require(bindingPath);
-module.exports = sane;
+const binary = require('node-pre-gyp');
+const path = require('path');
+const bindingPath = binary.find(path.resolve(path.join(__dirname, './package.json')));
+const sane = require(bindingPath);
+const Sane = require("./lib/sane");
+Sane.backend = sane;
+module.exports = Sane;
 
+function keyForValue(obj, value) {
+  var result = null;
+  Object.keys(obj).forEach((key) => {
+    if(value == obj[key]) {
+      result = key;
+      return false;
+    }
+  });
+  return result == null ? "(unknown)" : result;
+}
+
+sane.Status.shortName = function(status) {
+  return keyForValue(sane.Status, status);
+}
+
+sane.ValueType.shortName = function(valueType) {
+  return keyForValue(sane.ValueType, valueType);
+}
+
+sane.Unit.shortName = function(unit) {
+  return keyForValue(sane.Unit, unit);
+}
+
+sane.Cap.shortName = function(cap) {
+  return keyForValue(sane.Cap, cap);
+}
+
+sane.Cap.asFlags = function(cap) {
+  var flags = [];
+  Object.keys(sane.Cap).forEach((key) => {
+    var value = sane.Cap[key];
+    if(typeof(value) == "number") {
+      //console.log("cap " + cap + " has flag " + value + " set: ", (cap & value));
+      if((cap & value) > 0) {
+        flags.push(value);
+      }
+    }
+  });
+  return flags;
+}
+
+sane.Cap.asFlagNames = function(cap) {
+  var flags = [];
+  Object.keys(sane.Cap).forEach((key) => {
+    var value = sane.Cap[key];
+    if(typeof(value) == "number") {
+      if((cap & value) > 0) {
+        flags.push(key);
+      }
+    }
+  });
+  return flags;
+}
+
+sane.ConstraintType.shortName = function(ct) {
+  return keyForValue(sane.ConstraintType, ct);
+}
+
+sane.Action.shortName = function(action) {
+  return keyForValue(sane.Action, action);
+}
+
+sane.Info.shortName = function(info) {
+  return keyForValue(sane.Info, info);
+}
+
+sane.Frame.shortName = function(frame) {
+  return keyForValue(sane.Frame, frame);
+}
+
+/*
 sane.Status = {
   GOOD          : 0,
   UNSUPPORTED   : 1,
@@ -75,7 +148,7 @@ sane.Info = {
 };
 Object.freeze(sane.Info);
 
-sane.Frame = {
+sane.FrameXXX = {
   GRAY  : 0,
   RGB   : 1,
   RED   : 2,
@@ -83,4 +156,4 @@ sane.Frame = {
   BLUE  : 4
 };
 Object.freeze(sane.Frame);
-
+*/

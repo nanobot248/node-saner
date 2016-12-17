@@ -32,8 +32,15 @@ NAN_MODULE_INIT(SaneParameters::Init) {
 
 NAN_METHOD(SaneParameters::New) {
     Nan::HandleScope scope;
-	SANE_Parameters* parameters = new SANE_Parameters();
-	info.Holder()->SetInternalField(0, Nan::New<External>(parameters));
+    SANE_Parameters* parameters = NULL;
+    if(info.Length() > 0) {
+      Local<External> parametersExt = info[0].As<External>();
+      parameters = static_cast<SANE_Parameters*>(parametersExt->Value());
+    }
+    if(parameters == NULL) {
+	     parameters = new SANE_Parameters();
+     }
+	  info.Holder()->SetInternalField(0, Nan::New<External>(parameters));
     info.GetReturnValue().Set(info.Holder());
 }
 
@@ -150,4 +157,3 @@ NAN_SETTER(SaneParameters::SetDepth) {
 	SANE_Parameters* parameters = static_cast<SANE_Parameters*>(parametersExt->Value());
 	parameters->depth = depth->Value();
 }
-

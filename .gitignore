@@ -1,6 +1,6 @@
 build/*
 src/build/*
-lib/*
+lib/binding/*
 node_modules/*
 
 # Vim temporary files

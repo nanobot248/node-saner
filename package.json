@@ -1,8 +1,8 @@
 {
-  "name": "node-sane",
-  "version": "0.1.0",
-  "author": "Wong Yong Jie <yjwong92@gmail.com>",
-  "description": "a node.js interface to SANE (Scanner Access Now Easy)",
+  "name": "node-saner",
+  "version": "0.0.1",
+  "author": "Andreas Hubert <nanobot248@gmail.com>",
+  "description": "Fork of the nodejs SANE (Scanner Access Now Easy) interface created by Wong Yong Jie <yjwong92@gmail.com>. Imports SANE constants from header files (instead of hard-coded JavaScript) and adds an object-oriented nodejs API.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yjwong/node-sane.git"
+    "url": "https://github.com/nanobot248/node-saner.git"
   },
   "keywords": [
     "sane",
@@ -22,10 +22,12 @@
   "license": "MIT",
   "gypfile": true,
   "bugs": {
-    "url": "https://github.com/yjwong/node-sane/issues"
+    "url": "https://github.com/nanobot248/node-saner/issues"
   },
-  "homepage": "https://github.com/yjwong/node-sane#readme",
+  "homepage": "https://github.com/nanobot248/node-saner#readme",
   "dependencies": {
+    "fs-extra": "^1.0.0",
+    "minimist": "^1.2.0",
     "nan": "^2.1.0",
     "node-pre-gyp": "^0.6.13"
   },
@@ -33,9 +35,9 @@
     "node-pre-gyp"
   ],
   "binary": {
-    "module_name": "node-sane",
+    "module_name": "node-saner",
     "module_path": "./lib/binding/",
-    "host": "https://node-sane.s3-ap-southeast-1.amazonaws.com"
+    "host": "https://node-saner.s3-ap-southeast-1.amazonaws.com"
   },
   "devDependencies": {
     "aws-sdk": "^2.2.11"
